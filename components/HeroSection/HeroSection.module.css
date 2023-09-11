@@ -1,0 +1,54 @@
+/* For screens smaller than 600px (mobile devices) */
+.heroSection {
+  caret-color: transparent;
+}
+@media only screen and (max-width: 600px) {
+  .heroSection {
+    padding: 20px;
+  }
+  .heroSection_box {
+    flex-direction: column;
+  }
+  .heroSection_box_left {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  .heroSection_box_right {
+    text-align: center;
+  }
+  .heroSection h1 {
+    font-size: 24px;
+  }
+  .heroSection p {
+    font-size: 16px;
+  }
+}
+.heroSection_box_right img {
+  width: 100%;
+  height: auto;
+}
+/* For screens larger than 600px (laptop and desktop devices) */
+@media only screen and (min-width: 600px) {
+  .heroSection {
+    padding: 40px;
+  }
+  .heroSection_box {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .heroSection_box_left {
+    width: 50%;
+    margin-right: 20px;
+  }
+  .heroSection_box_right {
+    width: 50%;
+  }
+  .heroSection h1 {
+    font-size: 36px;
+  }
+  .heroSection p {
+    font-size: 20px;
+  }
+}
