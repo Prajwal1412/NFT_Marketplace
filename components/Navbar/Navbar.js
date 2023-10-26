@@ -4,8 +4,8 @@ import Link from "next/link";
 
 //WALLET-CONNECT
 import { useWeb3Modal } from "@web3modal/react";
-import { WagmiConfig } from "wagmi";
-import { useAccount } from "wagmi";
+
+import { useAccount, isConnected } from "wagmi";
 //----IMPORT ICON
 import { BsSearch } from "react-icons/bs";
 import { CgMenuLeft, CgMenuRight } from "react-icons/cg";
@@ -80,6 +80,14 @@ const Navbar = () => {
   const { open, close } = useWeb3Modal();
 
   //ADDRESS
+  const printadd = () => {
+    if (isConnected) {
+      console.log("Wallet Connected to :" + address);
+    } else {
+      console.log("Wallet Not Connected");
+    }
+  };
+
   const { address, isConnected } = useAccount();
   return (
     <div className={Style.navbar}>
@@ -112,6 +120,12 @@ const Navbar = () => {
             </Link>
           </div>
 
+          <div className={Style.navbar_container_right_discover}>
+            <Link href="/searchPage">
+              <p>Search</p>
+            </Link>
+          </div>
+
           {/* HELP CENTER MENU */}
 
           <div className={Style.navbar_container_right_help}>
@@ -133,7 +147,8 @@ const Navbar = () => {
               btnName="Connect"
               handleClick={() => {
                 open();
-                console.log("Wallet Connected to :" + address);
+
+                printadd();
               }}
             />
           </div>

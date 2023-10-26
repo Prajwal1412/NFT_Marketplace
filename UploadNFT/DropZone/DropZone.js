@@ -10,20 +10,22 @@ const DropZone = ({
   title,
   heading,
   subHeading,
-  itemName,
-  website,
+  name,
   description,
-  royalties,
-  fileSize,
-  category,
-  properties,
-  image,
+  amount,
+  price,
+  uploadToIPFS,
+  setImage,
 }) => {
-  const [fileUrl, setFileUrl] = useState(null);
+  const [fileUrl, setFileUrl] = useState("");
 
   const onDrop = useCallback(async (acceptedFile) => {
-    setFileUrl(acceptedFile[0]);
-  });
+    const file = acceptedFile[0];
+    const url = await uploadToIPFS(file);
+    setFileUrl(url);
+    setImage(url);
+    console.log("IMAGE UPLOADED TO : ", url);
+  }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -38,7 +40,7 @@ const DropZone = ({
           <p>{title}</p>
           <div className={Style.DropZone_box_input_img}>
             <Image
-              src={image}
+              src={images.upload}
               alt="upload"
               width={100}
               height={100}
@@ -54,48 +56,32 @@ const DropZone = ({
       {fileUrl && (
         <aside className={Style.DropZone_box_aside}>
           <div className={Style.DropZone_box_aside_box}>
-            <Image
-              src={images.nft_image_1}
-              alt="nft image"
-              width={200}
-              height={200}
-            />
+            <Image src={fileUrl} alt="Nft image" width={150} height={150} />
 
             <div className={Style.DropZone_box_aside_box_preview}>
               <div className={Style.DropZone_box_aside_box_preview_one}>
                 <p>
-                  <samp>NFT Name:</samp>
-                  {itemName || ""}
-                </p>
-                <p>
-                  <samp>Website:</samp>
-                  {website || ""}
+                  <samp>NFT Name :</samp>
+                  {name || ""}
                 </p>
               </div>
 
               <div className={Style.DropZone_box_aside_box_preview_two}>
                 <p>
-                  <span>Description</span>
+                  <span>Description :</span>
                   {description || ""}
                 </p>
               </div>
 
               <div className={Style.DropZone_box_aside_box_preview_three}>
                 <p>
-                  <span>Royalties</span>
-                  {royalties || ""}
+                  <span>Price :</span>
+                  {price || ""}
                 </p>
+
                 <p>
-                  <span>FileSize</span>
-                  {fileSize || ""}
-                </p>
-                <p>
-                  <span>Properties</span>
-                  {properties || ""}
-                </p>
-                <p>
-                  <span>Category</span>
-                  {category || ""}
+                  <span>Amount :</span>
+                  {amount || ""}
                 </p>
               </div>
             </div>
