@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Image from "next/image";
 import { BsImage } from "react-icons/bs";
-
+import { ethers } from "ethers";
 //INTERNAL IMPORT
 import Style from "./NFTCardTwo.module.css";
 
 const NFTCardTwo = ({ NFTData }) => {
+  useEffect(() => {
+    console.log(NFTData); // Check the NFTData array in the console
+  }, [NFTData]);
+
   return (
     <div className={Style.NFTCardTwo}>
       {NFTData.map((el, i) => (
@@ -17,11 +21,10 @@ const NFTCardTwo = ({ NFTData }) => {
               </div>
             </div>
           </div>
-
           <div className={Style.NFTCardTwo_box_img}>
             <Image
               src={el.image}
-              alt="NFT"
+              alt="NFT Image Loading...."
               width={400}
               height={400}
               objectFit="cover"
@@ -33,13 +36,12 @@ const NFTCardTwo = ({ NFTData }) => {
             <div className={Style.NFTCardTwo_box_info_left}>
               <p>{el.name}</p>
             </div>
-            <small>4{i + 2}</small>
           </div>
 
           <div className={Style.NFTCardTwo_box_price}>
             <div className={Style.NFTCardTwo_box_price_box}>
-              <small>Buying Price</small>
-              <p>{el.price}</p>
+              <small>Price</small>
+              <p>{ethers.utils.formatUnits(el.price)}</p>
             </div>
           </div>
         </div>

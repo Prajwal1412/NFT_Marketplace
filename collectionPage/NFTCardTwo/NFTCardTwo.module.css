@@ -9,6 +9,7 @@
 }
 
 .NFTCardTwo_box {
+  background-color: rgb(164, 133, 166);
   display: grid;
   cursor: pointer;
   transition: all 0.3s ease-in;

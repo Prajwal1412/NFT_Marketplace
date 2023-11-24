@@ -14,8 +14,6 @@ const Home = () => {
   return (
     <div className={Style.homepage}>
       <HeroSection />
-
-      <NFTCard />
     </div>
   );
 };

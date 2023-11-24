@@ -5,7 +5,7 @@ import Link from "next/link";
 //WALLET-CONNECT
 import { useWeb3Modal } from "@web3modal/react";
 
-import { useAccount, isConnected } from "wagmi";
+import { useAccount, isConnected, useDisconnect } from "wagmi";
 //----IMPORT ICON
 import { BsSearch } from "react-icons/bs";
 import { CgMenuLeft, CgMenuRight } from "react-icons/cg";
@@ -17,7 +17,7 @@ import { Button } from "../componentindex";
 import images from "../../img";
 import aboutus from "@/pages/aboutus";
 
-const Navbar = () => {
+const Navbar = ({ ethereumClient }) => {
   //----USESTATE COMPONNTS
 
   const [help, setHelp] = useState(false);
@@ -78,17 +78,23 @@ const Navbar = () => {
 
   //WALLET-CONNECT
   const { open, close } = useWeb3Modal();
-
-  //ADDRESS
-  const printadd = () => {
-    if (isConnected) {
-      console.log("Wallet Connected to :" + address);
+  const { address, isConnected } = useAccount();
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  useEffect(() => {
+    if (ethereumClient) {
+      ethereumClient.provider.on("accountsChanged", function (accounts) {
+        console.log(accounts);
+        setSelectedAccount(accounts[0]);
+      });
+    }
+  }, [ethereumClient]);
+  const handleClick = () => {
+    if (!selectedAccount) {
+      open();
     } else {
-      console.log("Wallet Not Connected");
+      console.log("ERROR WHILE CONNECTING WITH WALLET ");
     }
   };
-
-  const { address, isConnected } = useAccount();
   return (
     <div className={Style.navbar}>
       <div className={Style.navbar_container}>
@@ -144,22 +150,13 @@ const Navbar = () => {
           {/* CONNECT BUTTON SECTION */}
           <div className={Style.navbar_container_right_button}>
             <Button
-              btnName="Connect"
-              handleClick={() => {
-                open();
-
-                printadd();
-              }}
+              btnName={selectedAccount ? selectedAccount : "Connect"}
+              handleClick={handleClick}
             />
           </div>
           <div className={Style.navbar_container_right_button}>
             <Link href="/uploadNFT">
-              <Button
-                btnName="Create"
-                handleClick={() => {
-                  aboutus;
-                }}
-              />
+              <Button btnName="Create" handleClick={() => {}} />
             </Link>
           </div>
 

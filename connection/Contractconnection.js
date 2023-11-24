@@ -52,9 +52,6 @@ export const NFTMarketplaceprovider = ({ children }) => {
     console.log(contract);
     return contract;
   };
-  useEffect(() => {
-    getContract();
-  }, []);
 
   // CREATE NFT
   const createNFT = async (name, price, amount, image, description, router) => {
@@ -76,11 +73,10 @@ export const NFTMarketplaceprovider = ({ children }) => {
   };
 
   const createsale = async (amount, formprice) => {
-    const price = ethers.utils.parseUnits(formprice, "ether");
+    const price = ethers.utils.parseUnits(formprice);
     const contract = await getContract();
     const transaction = await contract.createNFT(amount, price);
     await transaction.wait();
-
     router.push("/searchPage");
     console.log("Transaction DATA:", transaction);
     console.log("NFT CREATED SUCCESSFULLY !!!!!!!!!!!!!!");
@@ -97,7 +93,36 @@ export const NFTMarketplaceprovider = ({ children }) => {
     }
   };
 
-  // Fetch created NFTs
+  // Fetch all created NFTs
+
+  const fetchListedNFTs = async () => {
+    try {
+      const contract = await getContract();
+      const listedNFTs = await contract.fetchListedNFTs();
+
+      listedNFTs.forEach((nftInfo) => {
+        console.log("Name:", nftInfo.name);
+        console.log("Token ID:", nftInfo.tokenId.toString());
+        console.log("Owner:", nftInfo.owner);
+        console.log("Price:", ethers.utils.formatUnits(nftInfo.price));
+        console.log("Is Sold:", nftInfo.isSold);
+        console.log("Remaining Amount:", nftInfo.remainingAmount);
+        console.log(" Image :", nftInfo.url);
+      });
+
+      return listedNFTs;
+    } catch (error) {
+      console.log("ERROR WHILE FETCH LISTED NFTs", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchListedNFTs().then((listedNFTs) => {
+      console.log("Listed NFT's", listedNFTs);
+    });
+  }, []);
+
+  // Fetch created NFTs by user
   const fetchCreatedNFTs = async () => {
     try {
       const contract = await getContract();
@@ -132,7 +157,12 @@ export const NFTMarketplaceprovider = ({ children }) => {
 
   return (
     <NFTMarketplaceconnection.Provider
-      value={{ getContract, createNFT, uploadToIPFS, fetchCreatedNFTs }}
+      value={{
+        getContract,
+        createNFT,
+        uploadToIPFS,
+        fetchListedNFTs,
+      }}
     >
       {children}
     </NFTMarketplaceconnection.Provider>

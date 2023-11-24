@@ -1,42 +1,27 @@
-import React from "react";
-import { useEffect, useState, useContext } from "react";
-//INTRNAL IMPORT
+import React, { useEffect, useState, useContext } from "react";
 import Style from "../styles/searchPage.module.css";
 import { SearchBar } from "../SearchPage/searchBarIndex";
-
 import { NFTCardTwo } from "../collectionPage/collectionIndex";
 import images from "../img";
-
 import { NFTMarketplaceconnection } from "../connection/Contractconnection";
-const searchPage = () => {
-  const { fetchCreatedNFTs } = useContext(NFTMarketplaceconnection);
-  const [nfts, setNfts] = useState([]);
-  const [nftsCopy, setNftsCopy] = useState([]);
+
+const SearchPage = () => {
+  const { fetchListedNFTs } = useContext(NFTMarketplaceconnection);
+  const [nftData, setNftData] = useState([]);
+
   useEffect(() => {
-    fetchCreatedNFTs().then((item) => {
-      const reversedNfts = item.slice().reverse(); // Create a new array with reversed data
-      setNfts(reversedNfts); // Update state with the new array
-      console.log(reversedNfts); // Log the reversed array
+    fetchListedNFTs().then((item) => {
+      setNftData(item);
+      console.log(nftData);
     });
   }, []);
 
-  const collectionArray = [
-    images.nft_image_1,
-    images.nft_image_2,
-    images.nft_image_3,
-    images.nft_image_1,
-    images.nft_image_2,
-    images.nft_image_3,
-    images.nft_image_1,
-    images.nft_image_2,
-  ];
   return (
     <div className={Style.searchPage}>
       <SearchBar />
-
-      <NFTCardTwo NFTData={nfts} />
+      <NFTCardTwo NFTData={nftData} />
     </div>
   );
 };
 
-export default searchPage;
+export default SearchPage;
