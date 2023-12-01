@@ -20,35 +20,6 @@
   box-shadow: var(--box-shadow);
 }
 
-.NFTCardTwo_box_like {
-  padding: 1rem;
-  grid-column: 1 / -1;
-  grid-row: 1 / -1;
-  z-index: 111111;
-}
-
-.NFTCardTwo_box_like_box_box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.NFTCardTwo_box_like_box_box_icon {
-  color: var(--icons-color);
-  font-size: 2rem;
-}
-
-.NFTCardTwo_box_like_box_box p {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 1.2rem;
-  background-color: var(--icons-color);
-  color: var(--main-bg-color);
-  border-radius: 2rem;
-  padding: 0 0.5rem;
-}
-
 .NFTCardTwo_box_img {
   grid-column: 1 / -1;
   grid-row: 1 / -1;

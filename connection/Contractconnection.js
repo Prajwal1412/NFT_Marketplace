@@ -69,13 +69,19 @@ export const NFTMarketplaceprovider = ({ children }) => {
     const added = await ipfs.add(data);
     const url = `https://infura-ipfs.io/ipfs/${added.cid.toString()}`;
     console.log("METADATA URL:", url);
-    await createsale(amount, price);
+    await createsale(amount, price, name, description, image);
   };
 
-  const createsale = async (amount, formprice) => {
+  const createsale = async (amount, formprice, name, description, image) => {
     const price = ethers.utils.parseUnits(formprice);
     const contract = await getContract();
-    const transaction = await contract.createNFT(amount, price);
+    const transaction = await contract.createNFT(
+      amount,
+      price,
+      name,
+      description,
+      image
+    );
     await transaction.wait();
     router.push("/searchPage");
     console.log("Transaction DATA:", transaction);
@@ -107,7 +113,7 @@ export const NFTMarketplaceprovider = ({ children }) => {
         console.log("Price:", ethers.utils.formatUnits(nftInfo.price));
         console.log("Is Sold:", nftInfo.isSold);
         console.log("Remaining Amount:", nftInfo.remainingAmount);
-        console.log(" Image :", nftInfo.url);
+        console.log(" Image :", nftInfo.image);
       });
 
       return listedNFTs;

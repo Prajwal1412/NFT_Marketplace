@@ -14,16 +14,22 @@ contract NFTMarketplace is ERC1155, Ownable {
     struct NFT {
         uint256 tokenId;
         address owner;
-        uint256 price; //  price in Ether
+        string name; // New field: name of the NFT
+        string description;
+        uint256 amount; // New field: amount of the NFT
+        string image; // New field: IPFS CID of the NFT image
+        uint256 price; // price in Ether
         bool isSold;
-        uint256 totalSupply; // Total supply of NFTs
-        uint256 remainingSupply; // Remaining supply of unsold NFTs
+        uint256 remainingAmount; // Remaining amount of unsold NFTs
     }
 
     struct NFTInfo {
         uint256 tokenId;
         address owner;
-        uint256 price; //  price in Ether
+        string name; // New field: name of the NFT
+        uint256 amount; // New field: amount of the NFT
+        string image; // New field: IPFS CID of the NFT image
+        uint256 price; // price in Ether
         bool isSold;
         uint256 remainingAmount;
     }
@@ -43,75 +49,74 @@ contract NFTMarketplace is ERC1155, Ownable {
 
     constructor() ERC1155("https://ipfs.infura.io:5001") {}
 
- // CREATE NFTS----------------------------------------------------------------------------------------------------------------------------------------------
-function createNFT(uint256 totalSupply, uint256 priceInEther) external returns (uint256) {
-    _currentTokenId++;
-    _nfts[_currentTokenId] = NFT(_currentTokenId, msg.sender, priceInEther, false, totalSupply, totalSupply);
-    _mint(msg.sender, _currentTokenId, totalSupply, "");
+    // CREATE NFTS----------------------------------------------------------------------------------------------------------------------------------------------
+    function createNFT(uint256 amount, uint256 priceInEther, string calldata name, string calldata description,string calldata image) external returns (uint256) {
+        _currentTokenId++;
+        _nfts[_currentTokenId] = NFT(_currentTokenId, msg.sender, name, description, amount, image, priceInEther, false, amount);
+        _mint(msg.sender, _currentTokenId, amount, "");
 
-    // Add the newly created NFT to the user's unsold NFTs
-    _userUnsoldNFTs[msg.sender].push(_currentTokenId);
-    // Add the newly created NFT to the user's created NFTs
-    _userCreatedNFTs[msg.sender].push(_currentTokenId);
-    return _currentTokenId;
-}
-// BUY NFT------------------------------------------------------------------------------------------------------------------------------------------------------------
-function buyNFT(uint256 tokenId, uint256 amount) external payable {
-    require(_nfts[tokenId].remainingSupply >= amount, "Insufficient NFTs available");
-    require(msg.value >= _nfts[tokenId].price * amount, "Insufficient funds");
-    require(_nfts[tokenId].owner != address(0), "Token doesn't exist");
-     require(_nfts[tokenId].owner != msg.sender, "Cannot buy your own NFT");
-    _nfts[tokenId].remainingSupply -= amount; // Update the remaining supply
-    address previousOwner = _nfts[tokenId].owner;
-    address newOwner = msg.sender;
-
-    // Transfer the NFT
-    _safeTransferFrom(previousOwner, newOwner, tokenId, amount, "");
-
-    if (_nfts[tokenId].remainingSupply > 0) {
-        // If there are remaining unsold NFTs, mark them as unsold
-        _nfts[tokenId].isSold = false;
-
-      // Update the user's unsold NFTs
-uint256[] storage unsoldNFTs = _userUnsoldNFTs[previousOwner];
-uint256 remainingUnsold = _nfts[tokenId].totalSupply - _nfts[tokenId].remainingSupply;
-
-// Remove the sold NFTs from the user's unsold NFTs
-for (uint256 i = 0; i < unsoldNFTs.length; i++) {
-    if (unsoldNFTs[i] == tokenId) {
-        unsoldNFTs[i] = unsoldNFTs[unsoldNFTs.length - 1];
-        unsoldNFTs.pop();
-        break;
+        // Add the newly created NFT to the user's unsold NFTs
+        _userUnsoldNFTs[msg.sender].push(_currentTokenId);
+        // Add the newly created NFT to the user's created NFTs
+        _userCreatedNFTs[msg.sender].push(_currentTokenId);
+        return _currentTokenId;
     }
-}
 
-// Add the remaining unsold NFTs back to the user's unsold NFTs
-for (uint256 i = 0; i < remainingUnsold; i++) {
-    // Check if tokenId is not already in the list before adding
-    bool tokenIdAlreadyInList = false;
-    for (uint256 j = 0; j < unsoldNFTs.length; j++) {
-        if (unsoldNFTs[j] == tokenId) {
-            tokenIdAlreadyInList = true;
-            break;
+    // BUY NFT------------------------------------------------------------------------------------------------------------------------------------------------------------
+    function buyNFT(uint256 tokenId, uint256 amount) external payable {
+        require(_nfts[tokenId].remainingAmount >= amount, "Insufficient NFTs available");
+        require(msg.value >= _nfts[tokenId].price * amount, "Insufficient funds");
+        require(_nfts[tokenId].owner != address(0), "Token doesn't exist");
+        require(_nfts[tokenId].owner != msg.sender, "Cannot buy your own NFT");
+        _nfts[tokenId].remainingAmount -= amount; // Update the remaining amount
+        address previousOwner = _nfts[tokenId].owner;
+        address newOwner = msg.sender;
+
+        // Transfer the NFT
+        _safeTransferFrom(previousOwner, newOwner, tokenId, amount, "");
+
+        if (_nfts[tokenId].remainingAmount > 0) {
+            // If there are remaining unsold NFTs, mark them as unsold
+            _nfts[tokenId].isSold = false;
+
+            // Update the user's unsold NFTs
+            uint256[] storage unsoldNFTs = _userUnsoldNFTs[previousOwner];
+            uint256 remainingUnsold = _nfts[tokenId].amount - _nfts[tokenId].remainingAmount;
+
+            // Remove the sold NFTs from the user's unsold NFTs
+            for (uint256 i = 0; i < unsoldNFTs.length; i++) {
+                if (unsoldNFTs[i] == tokenId) {
+                    unsoldNFTs[i] = unsoldNFTs[unsoldNFTs.length - 1];
+                    unsoldNFTs.pop();
+                    break;
+                }
+            }
+
+            // Add the remaining unsold NFTs back to the user's unsold NFTs
+            for (uint256 i = 0; i < remainingUnsold; i++) {
+                // Check if tokenId is not already in the list before adding
+                bool tokenIdAlreadyInList = false;
+                for (uint256 j = 0; j < unsoldNFTs.length; j++) {
+                    if (unsoldNFTs[j] == tokenId) {
+                        tokenIdAlreadyInList = true;
+                        break;
+                    }
+                }
+
+                // Add tokenId to the list only if it's not already present
+                if (!tokenIdAlreadyInList) {
+                    _userUnsoldNFTs[previousOwner].push(tokenId);
+                }
+            }
         }
+
+        // Add the purchased NFT to the user's purchased NFTs
+        _userPurchasedNFTs[newOwner].push(tokenId);
+        // Add the sold NFT to the seller's sold NFTs
+        _userSoldNFTs[previousOwner].push(tokenId);
     }
 
-    // Add tokenId to the list only if it's not already present
-    if (!tokenIdAlreadyInList) {
-        _userUnsoldNFTs[previousOwner].push(tokenId);
-    }
-}
-
-    }
-
-    // Add the purchased NFT to the user's purchased NFTs
-    _userPurchasedNFTs[newOwner].push(tokenId);
-    // Add the sold NFT to the seller's sold NFTs
-    _userSoldNFTs[previousOwner].push(tokenId);
-}
-
-
-// FETCH PURCHASED NFTS----------------------------------------------------------------------------------------------------------------------------------------------
+    // FETCH PURCHASED NFTS----------------------------------------------------------------------------------------------------------------------------------------------
     function fetchPurchasedNFTs() external view returns (NFTInfo[] memory) {
         uint256[] memory purchasedNFTs = _userPurchasedNFTs[msg.sender];
         NFTInfo[] memory nftInfos = new NFTInfo[](purchasedNFTs.length);
@@ -121,16 +126,20 @@ for (uint256 i = 0; i < remainingUnsold; i++) {
             nftInfos[i] = NFTInfo(
                 tokenId,
                 _nfts[tokenId].owner,
+                _nfts[tokenId].name,
+                _nfts[tokenId].amount,
+                _nfts[tokenId].image,
                 _nfts[tokenId].price,
                 _nfts[tokenId].isSold,
-                _nfts[tokenId].totalSupply - _nfts[tokenId].remainingSupply
+                _nfts[tokenId].amount - _nfts[tokenId].remainingAmount
+
             );
         }
 
         return nftInfos;
     }
 
-// FETCH CREATED NFTS----------------------------------------------------------------------------------------------------------------------------------------------
+    // FETCH CREATED NFTS----------------------------------------------------------------------------------------------------------------------------------------------
     function fetchCreatedNFTs() external view returns (NFTInfo[] memory) {
         uint256[] memory createdNFTs = _userCreatedNFTs[msg.sender];
         NFTInfo[] memory nftInfos = new NFTInfo[](createdNFTs.length);
@@ -140,16 +149,19 @@ for (uint256 i = 0; i < remainingUnsold; i++) {
             nftInfos[i] = NFTInfo(
                 tokenId,
                 _nfts[tokenId].owner,
+                _nfts[tokenId].name,
+                _nfts[tokenId].amount,
+                _nfts[tokenId].image,
                 _nfts[tokenId].price,
                 _nfts[tokenId].isSold,
-                _nfts[tokenId].remainingSupply
+                _nfts[tokenId].remainingAmount
             );
         }
 
         return nftInfos;
     }
 
-// FETCH SOLD NFTS----------------------------------------------------------------------------------------------------------------------------------------------
+    // FETCH SOLD NFTS----------------------------------------------------------------------------------------------------------------------------------------------
     function fetchSoldNFTs() external view returns (NFTInfo[] memory) {
         uint256[] memory soldNFTs = _userSoldNFTs[msg.sender];
         NFTInfo[] memory nftInfos = new NFTInfo[](soldNFTs.length);
@@ -159,17 +171,19 @@ for (uint256 i = 0; i < remainingUnsold; i++) {
             nftInfos[i] = NFTInfo(
                 tokenId,
                 _nfts[tokenId].owner,
+                _nfts[tokenId].name,
+                _nfts[tokenId].amount,
+                _nfts[tokenId].image,
                 _nfts[tokenId].price,
                 _nfts[tokenId].isSold,
-                _nfts[tokenId].totalSupply - _nfts[tokenId].remainingSupply
+                _nfts[tokenId].amount - _nfts[tokenId].remainingAmount
             );
         }
 
         return (nftInfos);
     }
 
-// FETCH UNSOLD NFTS----------------------------------------------------------------------------------------------------------------------------------------------
-   
+    // FETCH UNSOLD NFTS----------------------------------------------------------------------------------------------------------------------------------------------
     function fetchUnsoldNFTs() external view returns (NFTInfo[] memory) {
         uint256[] memory UnsoldNFTs = _userUnsoldNFTs[msg.sender];
         NFTInfo[] memory nftInfos = new NFTInfo[](UnsoldNFTs.length);
@@ -179,17 +193,19 @@ for (uint256 i = 0; i < remainingUnsold; i++) {
             nftInfos[i] = NFTInfo(
                 tokenId,
                 _nfts[tokenId].owner,
+                _nfts[tokenId].name,
+                _nfts[tokenId].amount,
+                _nfts[tokenId].image,
                 _nfts[tokenId].price,
                 _nfts[tokenId].isSold,
-                _nfts[tokenId].remainingSupply
+                _nfts[tokenId].remainingAmount
             );
         }
 
         return (nftInfos);
     }
-  
 
-// FETCH LISTED NFTS----------------------------------------------------------------------------------------------------------------------------------------------
+    // FETCH LISTED NFTS----------------------------------------------------------------------------------------------------------------------------------------------
     function fetchListedNFTs() external view returns (NFTInfo[] memory) {
         uint256[] memory listedNFTs = new uint256[](_currentTokenId);
         uint256 index = 0;
@@ -208,9 +224,12 @@ for (uint256 i = 0; i < remainingUnsold; i++) {
             nftInfos[i] = NFTInfo(
                 tokenId,
                 _nfts[tokenId].owner,
+                _nfts[tokenId].name,
+                _nfts[tokenId].amount,
+                _nfts[tokenId].image,
                 _nfts[tokenId].price,
                 _nfts[tokenId].isSold,
-                _nfts[tokenId].remainingSupply
+                _nfts[tokenId].remainingAmount
             );
         }
 
